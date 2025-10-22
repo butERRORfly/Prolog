@@ -212,7 +212,7 @@ average_grade_per_subject_alt :-
     findall(_, (
         subject(Code, Name),
         findall(Grade, grade(_, Code, Grade), Grades),
-        Grades \= [], % проверяем что есть оценки
+        Grades \= [],
         sum_list(Grades, Sum),
         my_length(Grades, Count),
         Average is Sum / Count,
