@@ -202,8 +202,10 @@ grade('Круглотличников','ENG',3).
 grade('Круглотличников','PSY',5).
 
 my_length([], 0).
-
 my_length([_|T], N) :- my_length(T, N1), N is N1 + 1.
+
+my_member(X, [X|_]).
+my_member(X, [_|T]) :- my_member(X, T).
 
 average_grade_per_subject_alt :-
     write('-------------------------'), nl,
@@ -212,7 +214,7 @@ average_grade_per_subject_alt :-
     findall(_, (
         subject(Code, Name),
         findall(Grade, grade(_, Code, Grade), Grades),
-        Grades \= [],
+        Grades \= [], % проверяем что есть оценки
         sum_list(Grades, Sum),
         my_length(Grades, Count),
         Average is Sum / Count,
@@ -224,24 +226,25 @@ failed_students_per_group_alt :-
     write('Кол-во не сдавших по группам'), nl,
     write('-------------------------'), nl,
     setof(Group, Student^student(Group, Student), Groups),
-    member(Group, Groups),
-    findall(Student, (
-        student(Group, Student), 
-        grade(Student, _, 2)
-    ), FailedStudents),
-    remove_duplicates(FailedStudents, UniqueFailedStudents),
-    my_length(UniqueFailedStudents, Count),
-    format('Группа ~w: ~w~n', [Group, Count]),
-failed_students_per_group_alt.
+    findall(_, (
+        my_member(Group, Groups),
+        findall(Student, (
+            student(Group, Student), 
+            grade(Student, _, 2)
+        ), FailedStudents),
+        remove_duplicates(FailedStudents, UniqueFailedStudents),
+        my_length(UniqueFailedStudents, Count),
+        format('Группа ~w: ~w~n', [Group, Count])
+    ), _).
 
 remove_duplicates([], []).
 remove_duplicates([H|T], [H|Result]) :-
     remove_duplicates(T, Temp),
-    \+ member(H, Temp),
+    \+ my_member(H, Temp),
     Result = Temp.
 remove_duplicates([H|T], Result) :-
     remove_duplicates(T, Temp),
-    member(H, Temp),
+    my_member(H, Temp),
     Result = Temp.
 
 failed_students_per_subject_alt :-
